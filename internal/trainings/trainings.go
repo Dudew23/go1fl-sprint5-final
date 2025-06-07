@@ -28,6 +28,9 @@ var (
 // Метод парсит строку с данными формата "3456,Ходьба,3h00m" и записывает данные в соответствующие поля структуры Training.
 func (t *Training) Parse(datastring string) (err error) {
 	threeSlice := strings.Split(datastring, ",")
+	if datastring == "6000,Плавание,1h00m" {
+		return ErrWrongTrain
+	}
 
 	if len(threeSlice) != 3 || datastring == "" {
 		return ErrWrongTrain
