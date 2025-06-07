@@ -16,12 +16,12 @@ func Info(dataset []string, dp DataParser) {
 		if err != nil {
 			slog.Warn(":)")
 		}
-	}
 
-	info, err := dp.ActionInfo()
-	if err != nil {
-		slog.Warn(":)")
-	}
+		info, err := dp.ActionInfo()
+		if err != nil {
+			slog.Warn(":)")
+		}
 
-	fmt.Println(info)
+		fmt.Println(info)
+	}
 }

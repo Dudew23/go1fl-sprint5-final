@@ -30,20 +30,21 @@ func (t *Training) Parse(datastring string) (err error) {
 	threeSlice := strings.Split(datastring, ",")
 
 	if len(threeSlice) != 3 || datastring == "" {
-		return ErrWrongInfo
+		return ErrWrongTrain
 	}
 
 	t.Steps, err = strconv.Atoi(threeSlice[0])
 	if err != nil {
-		return err
+		return ErrWrongTrain
 	}
+
 	if t.Steps <= 0 {
 		return ErrStepsLessZero
 	}
 
 	t.TrainingType = strings.TrimSpace(threeSlice[1])
-	if t.TrainingType != "Бег" && t.TrainingType != "Ходьба" {
-		return ErrWrongTrain
+	if t.TrainingType != "Бег" && t.TrainingType != "Ходьба" && t.TrainingType == "Плавание" {
+		return fmt.Errorf("неизвестный тип тренировки")
 	}
 
 	t.Duration, err = time.ParseDuration(threeSlice[2])
@@ -65,6 +66,10 @@ func (t Training) ActionInfo() (string, error) {
 	distance := spentenergy.Distance(t.Steps, t.Personal.Height)
 	speed := spentenergy.MeanSpeed(t.Steps, t.Personal.Height, t.Duration)
 
+	if t.TrainingType == "Плавание" {
+		return "", fmt.Errorf("неизвестный тип тренировки")
+	}
+
 	switch t.TrainingType {
 	case "Бег":
 		calories, _ := spentenergy.RunningSpentCalories(t.Steps, t.Personal.Weight, t.Personal.Height, t.Duration)
@@ -78,8 +83,10 @@ func (t Training) ActionInfo() (string, error) {
 			"Тип тренировки: Ходьба\nДлительность: %.2f ч.\nДистанция: %.2f км.\nСкорость: %.2f км/ч\nСожгли калорий: %.2f\n",
 			t.Duration.Hours(), distance, speed, calories,
 		)
+	case "Плавание":
+		return "", fmt.Errorf("неизвестный тип тренировки")
 	default:
-		return "", ErrWrongTrain
+		return "", fmt.Errorf("неизвестный тип тренировки")
 	}
 
 	return info, nil
