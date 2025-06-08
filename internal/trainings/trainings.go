@@ -27,37 +27,40 @@ var (
 
 // Метод парсит строку с данными формата "3456,Ходьба,3h00m" и записывает данные в соответствующие поля структуры Training.
 func (t *Training) Parse(datastring string) (err error) {
-	threeSlice := strings.Split(datastring, ",")
-	if datastring == "6000,Плавание,1h00m" {
+
+	parts := strings.Split(datastring, ",")
+	if len(parts) != 3 {
 		return ErrWrongTrain
 	}
 
-	if len(threeSlice) != 3 || datastring == "" {
+	stepsStr := parts[0]
+	if stepsStr == "" {
 		return ErrWrongTrain
 	}
-
-	t.Steps, err = strconv.Atoi(threeSlice[0])
+	steps, err := strconv.Atoi(stepsStr)
 	if err != nil {
 		return ErrWrongTrain
 	}
-
-	if t.Steps <= 0 {
-		return ErrStepsLessZero
+	if steps <= 0 {
+		return ErrWrongTrain
 	}
+	t.Steps = steps
 
-	t.TrainingType = strings.TrimSpace(threeSlice[1])
-	if t.TrainingType != "Бег" && t.TrainingType != "Ходьба" && t.TrainingType == "Плавание" {
-		return fmt.Errorf("неизвестный тип тренировки")
+	trainingType := parts[1]
+	if trainingType == "" {
+		return ErrWrongTrain
 	}
+	t.TrainingType = trainingType
 
-	t.Duration, err = time.ParseDuration(threeSlice[2])
+	durationStr := parts[2]
+	duration, err := time.ParseDuration(durationStr)
 	if err != nil {
-		return err
+		return ErrWrongTrain
 	}
-
-	if t.Duration <= 0 {
-		return ErrDurLessZero
+	if duration <= 0 {
+		return ErrWrongTrain
 	}
+	t.Duration = duration
 
 	return nil
 }
@@ -70,7 +73,7 @@ func (t Training) ActionInfo() (string, error) {
 	speed := spentenergy.MeanSpeed(t.Steps, t.Personal.Height, t.Duration)
 
 	if t.TrainingType == "Плавание" {
-		return "", fmt.Errorf("неизвестный тип тренировки")
+		return "", ErrWrongTrain
 	}
 
 	switch t.TrainingType {
@@ -87,9 +90,9 @@ func (t Training) ActionInfo() (string, error) {
 			t.Duration.Hours(), distance, speed, calories,
 		)
 	case "Плавание":
-		return "", fmt.Errorf("неизвестный тип тренировки")
+		return "", ErrWrongTrain
 	default:
-		return "", fmt.Errorf("неизвестный тип тренировки")
+		return "", ErrWrongTrain
 	}
 
 	return info, nil

@@ -296,6 +296,14 @@ func (suite *SpentCaloriesTestSuite) TestActionInfo() {
 			want:    "Тип тренировки: Бег\nДлительность: 0.50 ч.\nДистанция: 2.36 км.\nСкорость: 4.72 км/ч\nСожгли калорий: 177.19\n",
 			wantErr: false,
 		},
+		{
+			name:    "неизвестный тип тренировки",
+			input:   "6000,Плавание,1h00m",
+			weight:  75.0,
+			height:  1.75,
+			want:    "",
+			wantErr: true,
+		},
 	}
 
 	for _, tt := range tests {
